@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leave approval</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#172036; --paper:#F4F6F9; --surface:#FFFFFF; --line:#D6DBE4; --muted:#5B6578;
+  --pine:#1D6A50; --pine-bg:#E3F1EA; --amber:#B4741A; --amber-bg:#FBF0DC;
+  --brick:#A63A2C; --brick-bg:#F8E4E0; --grey-bg:#E9ECF1; --blue:#2D4A86;
+  --serif:'Newsreader',Georgia,serif; --sans:'Public Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.5 var(--sans)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0;letter-spacing:-.01em}
+h1{font-size:28px;line-height:1.2} h2{font-size:22px;line-height:1.25} h3{font-size:18px}
+p{margin:0}
+a{color:var(--blue)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.muted{color:var(--muted)} .small{font-size:13px}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+
+/* header */
+.top{background:var(--ink);color:#fff}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.brand{font-family:var(--serif);font-size:20px;font-weight:600}
+.who{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:14px}
+.who span{opacity:.85;margin-right:6px}
+.linkbtn{background:none;border:0;color:#fff;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px 6px;font-size:14px}
+.tabs{background:var(--surface);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:14px 12px 11px;cursor:pointer;white-space:nowrap;color:var(--muted);font-weight:500}
+.tab[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tab .count{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;border-radius:10px;background:var(--amber);color:#fff;font-size:12px;line-height:20px;text-align:center}
+main.wrap{padding-top:28px;padding-bottom:64px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+
+/* ledger */
+.ledgers{display:grid;gap:20px;margin:0 0 36px}
+.ledger{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px 20px}
+.ledger .line{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.ledger .num{font-family:var(--serif);font-size:34px;font-weight:600;line-height:1}
+.ticks{display:flex;flex-wrap:wrap;gap:4px}
+.tick{display:block;height:24px;width:calc(16px * var(--wf));min-width:8px;border:1px solid var(--ink);border-radius:2px;
+  background:linear-gradient(90deg,var(--ink) 0 var(--u),var(--amber) var(--u) var(--p),transparent var(--p) 100%)}
+.key{display:flex;gap:16px;margin-top:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.key i{display:inline-block;width:10px;height:10px;border:1px solid var(--ink);margin-right:6px;vertical-align:-1px;border-radius:2px}
+
+/* tables */
+.tablewrap{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;font-size:13px;color:var(--muted);background:#FAFBFC;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:13px;font-weight:500;white-space:nowrap}
+.b-approved{background:var(--pine-bg);color:var(--pine)} .b-pending{background:var(--amber-bg);color:#8A5710}
+.b-rejected{background:var(--brick-bg);color:var(--brick)} .b-cancelled{background:var(--grey-bg);color:var(--muted)}
+.empty{padding:36px 20px;text-align:center;color:var(--muted)}
+
+/* forms */
+.form{display:grid;gap:16px;max-width:560px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:560px){.row{grid-template-columns:1fr}}
+label{display:grid;gap:6px;font-weight:500;font-size:14px}
+label .hint{font-weight:400;color:var(--muted);font-size:13px}
+input,select,textarea{width:100%;padding:9px 11px;background:var(--surface);border:1px solid #AEB6C4;border-radius:5px;min-height:40px}
+textarea{min-height:84px;resize:vertical}
+input[type=checkbox]{width:auto;min-height:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:8px 16px;border-radius:5px;border:1px solid var(--ink);background:var(--ink);color:#fff;font-weight:500;cursor:pointer}
+.btn:hover{background:#0E1628}
+.btn.ghost{background:transparent;color:var(--ink)} .btn.ghost:hover{background:var(--grey-bg)}
+.btn.good{background:var(--pine);border-color:var(--pine)} .btn.good:hover{background:#17553F}
+.btn.bad{background:transparent;color:var(--brick);border-color:var(--brick)} .btn.bad:hover{background:var(--brick-bg)}
+.btn.sm{min-height:32px;padding:4px 12px;font-size:14px}
+.btn[disabled]{opacity:.55;cursor:default}
+.preview{min-height:24px;font-weight:500}
+.preview.warn{color:var(--brick)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.decision{display:grid;gap:8px;min-width:230px}
+.decision textarea{min-height:56px}
+.section{margin-top:40px}
+.filters{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.filters label{min-width:170px}
+
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:6px;background:var(--surface);overflow:hidden}
+.cal .dow{padding:8px;font-size:13px;font-weight:600;color:var(--muted);background:#FAFBFC;border-bottom:1px solid var(--line)}
+.cal .day{min-height:92px;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px;min-width:0}
+.cal .day:nth-child(7n){border-right:0}
+.cal .day.off{background:#F1F3F7;color:var(--muted)}
+.cal .day.hol{background:#EEF2FA}
+.cal .d{font-size:13px;font-weight:600}
+.cal .holname{font-size:11px;color:var(--blue);line-height:1.2}
+.chip{font-size:12px;line-height:1.3;padding:1px 6px;border-radius:3px;background:var(--pine-bg);color:var(--pine);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip.p{background:transparent;border:1px dashed var(--amber);color:#8A5710}
+@media (max-width:700px){.cal .day{min-height:64px;padding:3px}.chip{font-size:11px;padding:0 3px}}
+
+dialog{border:1px solid var(--line);border-radius:8px;padding:24px;max-width:480px;width:calc(100% - 32px);color:var(--ink);background:var(--surface)}
+dialog::backdrop{background:rgba(23,32,54,.45)}
+dialog h2{margin-bottom:14px}
+
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:6px;max-width:calc(100% - 32px);z-index:50;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.toast.err{background:var(--brick)}
+.center{min-height:100vh;display:grid;place-items:center;padding:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px;width:100%;max-width:400px}
+.panel .form{max-width:none;margin-top:18px}
+.err-inline{color:var(--brick);min-height:22px;font-size:14px}
+@media (prefers-reduced-motion:no-preference){.btn{transition:background .15s}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<dialog id="dlg"></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://bggyggfxxwumrojpwcpl.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_A2EFCxLhJrig-rLMCPNg_A_qDVy04eK';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const S = {
+  user: null, me: null, types: [], holidays: [], people: {},
+  tab: null, year: new Date().getFullYear(),
+  filter: { status: 'pending', person: '' },
+  month: { y: new Date().getFullYear(), m: new Date().getMonth() },
+  balances: []
+};
+const $ = (s, r = document) => r.querySelector(s);
+const app = $('#app');
+const view = () => $('#view');
+
+/* ---------- helpers ---------- */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
+const fmtDays = n => { n = Number(n); return Number.isInteger(n) ? String(n) : n.toFixed(1); };
+const parse = d => new Date(d + 'T00:00:00');
+const fmtDate = d => parse(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+const fmtShort = d => parse(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+const isoToday = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const iso = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+const errMsg = e => (e && e.message) || 'Something went wrong. Try again.';
+const typeName = id => (S.types.find(t => t.id === id) || {}).name || 'Leave';
+const personName = id => (S.people[id] || {}).full_name || 'Unknown';
+
+function toast(msg, kind) {
+  const t = $('#toast'); t.textContent = msg; t.className = 'toast' + (kind === 'err' ? ' err' : ''); t.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, kind === 'err' ? 6000 : 3500);
+}
+function rangeText(r) {
+  if (r.start_date === r.end_date) {
+    const note = r.start_session === 'am' && r.end_session === 'am' ? ', morning only'
+      : r.start_session === 'pm' && r.end_session === 'pm' ? ', afternoon only' : '';
+    return fmtDate(r.start_date) + note;
+  }
+  const bits = [];
+  if (r.start_session === 'pm') bits.push('starts afternoon');
+  if (r.end_session === 'am') bits.push('ends at midday');
+  return `${fmtShort(r.start_date)} to ${fmtDate(r.end_date)}` + (bits.length ? ', ' + bits.join(', ') : '');
+}
+const badge = s => `<span class="badge b-${s}">${s[0].toUpperCase() + s.slice(1)}</span>`;
+function openDialog(html) { const d = $('#dlg'); d.innerHTML = html; d.showModal(); return d; }
+function closeDialog() { const d = $('#dlg'); if (d.open) d.close(); }
+
+async function callAdmin(body) {
+  const { data, error } = await sb.functions.invoke('leave-admin', { body });
+  if (error) {
+    let msg = error.message;
+    try { const j = await error.context.json(); if (j && j.error) msg = j.error; } catch (_) {}
+    throw new Error(msg);
+  }
+  if (data && data.error) throw new Error(data.error);
+  return data;
+}
+
+/* ---------- boot ---------- */
+async function boot() {
+  const { data: { session } } = await sb.auth.getSession();
+  S.user = session ? session.user : null;
+  sb.auth.onAuthStateChange((_evt, sess) => {
+    const next = sess ? sess.user : null;
+    if ((next && next.id) !== (S.user && S.user.id)) { S.user = next; setTimeout(start, 0); }
+  });
+  start();
+}
+
+async function start() {
+  if (!S.user) { renderLogin(); return; }
+  app.innerHTML = '<div class="center"><p class="muted">Loading…</p></div>';
+  const { data: me, error } = await sb.from('leave_profiles').select('*').eq('id', S.user.id).maybeSingle();
+  if (error || !me || !me.active) { renderNoAccess(); return; }
+  S.me = me;
+  await Promise.all([loadTypes(), loadHolidays(), loadPeople()]);
+  await sb.rpc('leave_ensure_my_balances', { p_year: S.year });
+  S.tab = me.role === 'admin' ? 'requests' : 'my';
+  renderShell();
+}
+async function loadTypes() { const { data } = await sb.from('leave_types').select('*').order('name'); S.types = data || []; }
+async function loadHolidays() { const { data } = await sb.from('leave_holidays').select('*').order('holiday_date'); S.holidays = data || []; }
+async function loadPeople() {
+  const { data } = await sb.from('leave_profiles').select('*').order('full_name');
+  S.people = {}; (data || []).forEach(p => { S.people[p.id] = p; });
+}
+
+/* ---------- login ---------- */
+function renderLogin() {
+  app.innerHTML = `
+  <div class="center"><div class="panel">
+    <h1>Sign in</h1>
+    <p class="muted" style="margin-top:6px">Use the email and password your admin set up for you.</p>
+    <form id="loginForm" class="form" novalidate>
+      <label>Email<input name="email" type="email" autocomplete="username" required></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+      <p class="err-inline" id="loginErr" role="alert"></p>
+      <button class="btn" type="submit">Sign in</button>
+      <p class="small muted">Forgot your password? Ask your admin to reset it.</p>
+    </form>
+  </div></div>`;
+  $('#loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = e.target, btn = f.querySelector('button'), err = $('#loginErr');
+    err.textContent = ''; btn.disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email: f.email.value.trim(), password: f.password.value });
+    btn.disabled = false;
+    if (error) err.textContent = 'The email or password is incorrect.';
+  });
+}
+function renderNoAccess() {
+  app.innerHTML = `
+  <div class="center"><div class="panel">
+    <h1>No access yet</h1>
+    <p class="muted" style="margin-top:8px">This login isn't set up for the leave app, or the account has been deactivated. Ask your admin to add you.</p>
+    <p style="margin-top:18px"><button class="btn ghost" data-action="signout">Sign out</button></p>
+  </div></div>`;
+}
+
+/* ---------- shell ---------- */
+function tabsFor() {
+  const mine = [['my', 'My leave'], ['apply', 'Apply for leave']];
+  return S.me.role === 'admin'
+    ? [['requests', 'Requests'], ['calendar', "Who's off"], ['staff', 'Staff'], ['settings', 'Settings'], ...mine]
+    : mine;
+}
+async function renderShell() {
+  app.innerHTML = `
+  <header class="top"><div class="wrap">
+    <span class="brand">Leave approval</span>
+    <div class="who"><span>${esc(S.me.full_name)}</span>
+      <button class="linkbtn" data-action="changepw">Change password</button>
+      <button class="linkbtn" data-action="signout">Sign out</button></div>
+  </div></header>
+  <nav class="tabs" aria-label="Sections"><div class="wrap" id="tabs"></div></nav>
+  <main class="wrap" id="view"></main>`;
+  drawTabs(); renderTab(); refreshPendingCount();
+}
+function drawTabs(pending) {
+  $('#tabs').innerHTML = tabsFor().map(([k, label]) =>
+    `<button class="tab" data-action="tab" data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ''}>${esc(label)}${k === 'requests' && pending ? `<span class="count">${pending}</span>` : ''}</button>`
+  ).join('');
+}
+async function refreshPendingCount() {
+  if (S.me.role !== 'admin') return;
+  const { count } = await sb.from('leave_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending');
+  S.pendingCount = count || 0; drawTabs(S.pendingCount);
+}
+function renderTab() {
+  const fn = { my: viewMy, apply: viewApply, requests: viewRequests, calendar: viewCalendar, staff: viewStaff, settings: viewSettings }[S.tab];
+  drawTabs(S.pendingCount); fn();
+}
+const loading = () => { view().innerHTML = '<p class="muted">Loading…</p>'; };
+
+/* ---------- ledger ---------- */
+function ledger(b) {
+  const ent = Number(b.entitlement), used = Number(b.used), pend = Number(b.pending);
+  const n = Math.max(1, Math.ceil(ent));
+  let cells = '';
+  for (let i = 0; i < n; i++) {
+    const u = clamp(used - i, 0, 1) * 100, p = clamp(used + pend - i, 0, 1) * 100, wf = clamp(ent - i, 0.5, 1);
+    cells += `<span class="tick" style="--u:${u}%;--p:${p}%;--wf:${wf}"></span>`;
+  }
+  return `<div class="ledger">
+    <div class="line"><h3>${esc(typeName(b.leave_type_id))}</h3>
+      <div><span class="num">${fmtDays(b.remaining)}</span> <span class="muted">of ${fmtDays(ent)} days left</span></div></div>
+    <div class="ticks" role="img" aria-label="${fmtDays(used)} days used, ${fmtDays(pend)} pending, ${fmtDays(b.remaining)} left">${cells}</div>
+    <div class="key"><span><i style="background:var(--ink)"></i>Approved ${fmtDays(used)}</span><span><i style="background:var(--amber);border-color:var(--amber)"></i>Pending ${fmtDays(pend)}</span></div>
+  </div>`;
+}
+
+/* ---------- my leave ---------- */
+async function viewMy() {
+  loading();
+  const [bal, reqs] = await Promise.all([
+    sb.from('leave_balance_summary').select('*').eq('user_id', S.me.id).eq('year', S.year),
+    sb.from('leave_requests').select('*').eq('user_id', S.me.id).order('start_date', { ascending: false })
+  ]);
+  if (S.tab !== 'my') return;
+  const rows = (bal.data || []).sort((a, b) => typeName(a.leave_type_id).localeCompare(typeName(b.leave_type_id)));
+  const list = reqs.data || [];
+  view().innerHTML = `
+    <div class="head"><h1>My leave in ${S.year}</h1><button class="btn" data-action="tab" data-tab="apply">Apply for leave</button></div>
+    <div class="ledgers">${rows.length ? rows.map(ledger).join('') : '<p class="muted">No leave balances are set up for you yet. Ask your admin.</p>'}</div>
+    <h2 style="margin-bottom:14px">My requests</h2>
+    ${list.length ? `<div class="tablewrap"><table>
+      <thead><tr><th>Dates</th><th>Type</th><th class="num">Days</th><th>Status</th><th>Admin note</th><th></th></tr></thead><tbody>
+      ${list.map(r => `<tr>
+        <td>${esc(rangeText(r))}${r.reason ? `<div class="small muted">${esc(r.reason)}</div>` : ''}</td>
+        <td>${esc(typeName(r.leave_type_id))}</td><td class="num">${fmtDays(r.days)}</td><td>${badge(r.status)}</td>
+        <td>${esc(r.admin_comment || '')}</td>
+        <td>${r.status === 'pending' ? `<button class="btn ghost sm" data-action="cancelReq" data-id="${r.id}">Cancel</button>` : ''}</td>
+      </tr>`).join('')}</tbody></table></div>`
+      : '<div class="tablewrap"><p class="empty">You haven\'t applied for leave yet. Use “Apply for leave” to send your first request.</p></div>'}`;
+}
+
+/* ---------- apply ---------- */
+async function viewApply() {
+  loading();
+  const { data } = await sb.from('leave_balance_summary').select('*').eq('user_id', S.me.id);
+  S.balances = data || [];
+  if (S.tab !== 'apply') return;
+  const types = S.types.filter(t => t.active), today = isoToday();
+  view().innerHTML = `
+    <div class="head"><h1>Apply for leave</h1></div>
+    <form id="applyForm" class="form">
+      <label>Leave type<select name="type" required>${types.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select></label>
+      <div class="row">
+        <label>From<input type="date" name="start" value="${today}" required></label>
+        <label>Starting<select name="startSession"><option value="am">Morning</option><option value="pm">Afternoon</option></select></label>
+      </div>
+      <div class="row">
+        <label>To<input type="date" name="end" value="${today}" required></label>
+        <label>Ending<select name="endSession"><option value="pm">End of day</option><option value="am">Midday</option></select></label>
+      </div>
+      <p class="preview" id="preview" aria-live="polite"></p>
+      <label>Reason <span class="hint">Optional</span><textarea name="reason" maxlength="500"></textarea></label>
+      <label>Attachment <span class="hint">Optional, such as a medical certificate. PDF, JPG or PNG, up to 5 MB.</span>
+        <input type="file" name="file" accept="application/pdf,image/jpeg,image/png"></label>
+      <div class="actions"><button class="btn" type="submit">Submit request</button></div>
+    </form>`;
+  const f = $('#applyForm');
+  f.start.min = today;
+  f.addEventListener('input', e => {
+    if (e.target.name === 'start' && (!f.end.value || f.end.value < f.start.value)) f.end.value = f.start.value;
+    updatePreview();
+  });
+  f.addEventListener('submit', submitApply);
+  updatePreview();
+}
+async function updatePreview() {
+  const f = $('#applyForm'), out = $('#preview'); if (!f || !out) return;
+  const s = f.start.value, e = f.end.value;
+  out.className = 'preview';
+  if (!s || !e) { out.textContent = ''; return; }
+  if (e < s) { out.textContent = 'The end date must be on or after the start date.'; out.classList.add('warn'); return; }
+  if (s.slice(0, 4) !== e.slice(0, 4)) { out.textContent = 'A request can\'t span two calendar years. Send one request for each year.'; out.classList.add('warn'); return; }
+  if (s === e && f.startSession.value === 'pm' && f.endSession.value === 'am') { out.textContent = 'For one day, the start can\'t be after the end. Change the morning or afternoon choice.'; out.classList.add('warn'); return; }
+  const { data, error } = await sb.rpc('leave_working_days', { p_start: s, p_end: e, p_start_session: f.startSession.value, p_end_session: f.endSession.value });
+  if (error) { out.textContent = ''; return; }
+  const days = Number(data);
+  if (days <= 0) { out.textContent = 'These dates have no working days. Weekends and public holidays aren\'t counted.'; out.classList.add('warn'); return; }
+  const t = S.types.find(x => x.id === f.type.value), b = S.balances.find(x => x.leave_type_id === f.type.value && x.year === Number(s.slice(0, 4)));
+  let msg = `${fmtDays(days)} working day${days === 1 ? '' : 's'}. Weekends and public holidays aren't counted.`;
+  if (t && t.has_balance && b) {
+    const left = Number(b.remaining) - days;
+    if (left < 0) { msg = `${fmtDays(days)} working days is more than your ${fmtDays(b.remaining)} days left for ${t.name}.`; out.classList.add('warn'); }
+    else msg += ` You'll have ${fmtDays(left)} days left.`;
+  }
+  out.textContent = msg;
+}
+async function submitApply(e) {
+  e.preventDefault();
+  const f = e.target, btn = f.querySelector('button[type=submit]'); btn.disabled = true;
+  try {
+    let path = null; const file = f.file.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) throw new Error('The attachment is larger than 5 MB.');
+      path = `${S.me.id}/${crypto.randomUUID()}-${file.name.replace(/[^\w.\-]+/g, '_')}`;
+      const up = await sb.storage.from('leave-attachments').upload(path, file, { contentType: file.type });
+      if (up.error) throw up.error;
+    }
+    const { error } = await sb.from('leave_requests').insert({
+      user_id: S.me.id, leave_type_id: f.type.value, start_date: f.start.value, end_date: f.end.value,
+      start_session: f.startSession.value, end_session: f.endSession.value,
+      reason: f.reason.value.trim() || null, attachment_path: path
+    });
+    if (error) { if (path) await sb.storage.from('leave-attachments').remove([path]); throw error; }
+    toast('Request submitted'); S.tab = 'my'; renderTab();
+  } catch (err) { toast(errMsg(err), 'err'); btn.disabled = false; }
+}
+
+/* ---------- admin: requests ---------- */
+async function viewRequests() {
+  loading();
+  let q = sb.from('leave_requests').select('*').limit(300);
+  if (S.filter.status !== 'all') q = q.eq('status', S.filter.status);
+  if (S.filter.person) q = q.eq('user_id', S.filter.person);
+  q = q.order('start_date', { ascending: S.filter.status === 'pending' });
+  const { data, error } = await q;
+  if (S.tab !== 'requests') return;
+  if (error) { view().innerHTML = `<p class="err-inline">${esc(errMsg(error))}</p>`; return; }
+  const list = data || [];
+  const people = Object.values(S.people).sort((a, b) => a.full_name.localeCompare(b.full_name));
+  view().innerHTML = `
+    <div class="head"><h1>Leave requests</h1></div>
+    <div class="filters">
+      <label>Status<select id="fStatus">${['pending', 'approved', 'rejected', 'cancelled', 'all'].map(s => `<option value="${s}" ${S.filter.status === s ? 'selected' : ''}>${s[0].toUpperCase() + s.slice(1)}</option>`).join('')}</select></label>
+      <label>Person<select id="fPerson"><option value="">Everyone</option>${people.map(p => `<option value="${p.id}" ${S.filter.person === p.id ? 'selected' : ''}>${esc(p.full_name)}</option>`).join('')}</select></label>
+    </div>
+    ${list.length ? `<div class="tablewrap"><table>
+      <thead><tr><th>Person</th><th>Dates</th><th>Type</th><th class="num">Days</th><th>Status</th><th>Decision</th></tr></thead><tbody>
+      ${list.map(r => `<tr>
+        <td>${esc(personName(r.user_id))}</td>
+        <td>${esc(rangeText(r))}${r.reason ? `<div class="small muted">${esc(r.reason)}</div>` : ''}
+          ${r.attachment_path ? `<div><button class="linkbtn" style="color:var(--blue);padding:2px 0" data-action="viewfile" data-path="${esc(r.attachment_path)}">View attachment</button></div>` : ''}</td>
+        <td>${esc(typeName(r.leave_type_id))}</td><td class="num">${fmtDays(r.days)}</td><td>${badge(r.status)}</td>
+        <td>${r.status === 'pending' ? `<div class="decision">
+            <textarea id="c-${r.id}" placeholder="Note to ${esc(personName(r.user_id).split(' ')[0])} (needed to reject)" aria-label="Note"></textarea>
+            <div class="actions"><button class="btn good sm" data-action="decide" data-id="${r.id}" data-status="approved">Approve</button>
+            <button class="btn bad sm" data-action="decide" data-id="${r.id}" data-status="rejected">Reject</button></div></div>`
+          : `${esc(r.admin_comment || '')}${r.status === 'approved' ? `<div style="margin-top:6px"><button class="btn ghost sm" data-action="adminCancel" data-id="${r.id}">Cancel leave</button></div>` : ''}`}</td>
+      </tr>`).join('')}</tbody></table></div>`
+      : `<div class="tablewrap"><p class="empty">${S.filter.status === 'pending' ? 'No requests are waiting for a decision.' : 'No requests match these filters.'}</p></div>`}`;
+  $('#fStatus').addEventListener('change', e => { S.filter.status = e.target.value; viewRequests(); });
+  $('#fPerson').addEventListener('change', e => { S.filter.person = e.target.value; viewRequests(); });
+}
+async function decide(id, status) {
+  const note = ($('#c-' + id) || {}).value || '';
+  if (status === 'rejected' && !note.trim()) { toast('Add a note so the person knows why it was rejected.', 'err'); $('#c-' + id).focus(); return; }
+  const { error } = await sb.from('leave_requests').update({ status, admin_comment: note.trim() || null }).eq('id', id);
+  if (error) { toast(errMsg(error), 'err'); return; }
+  toast(status === 'approved' ? 'Approved' : 'Rejected'); viewRequests(); refreshPendingCount();
+}
+
+/* ---------- admin: who's off ---------- */
+async function viewCalendar() {
+  loading();
+  const { y, m } = S.month, first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate();
+  const start = iso(y, m, 1), end = iso(y, m, days);
+  const { data } = await sb.from('leave_requests').select('*').in('status', ['approved', 'pending']).lte('start_date', end).gte('end_date', start);
+  if (S.tab !== 'calendar') return;
+  const hol = {}; S.holidays.forEach(h => { hol[h.holiday_date] = h.name; });
+  const lead = (first.getDay() + 6) % 7;
+  let cells = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => `<div class="dow">${d}</div>`).join('');
+  for (let i = 0; i < lead; i++) cells += '<div class="day off"></div>';
+  for (let d = 1; d <= days; d++) {
+    const date = iso(y, m, d), dow = new Date(y, m, d).getDay(), weekend = dow === 0 || dow === 6;
+    const chips = (weekend || hol[date]) ? '' : (data || []).filter(r => r.start_date <= date && r.end_date >= date).map(r => {
+      const half = (date === r.start_date && r.start_session === 'pm') ? ' (pm)' : (date === r.end_date && r.end_session === 'am') ? ' (am)' : '';
+      const nm = personName(r.user_id);
+      return `<div class="chip ${r.status === 'pending' ? 'p' : ''}" title="${esc(nm)}, ${esc(typeName(r.leave_type_id))}, ${r.status}">${esc(nm.split(' ')[0])}${half}</div>`;
+    }).join('');
+    cells += `<div class="day ${weekend ? 'off' : ''} ${hol[date] ? 'hol' : ''}"><span class="d">${d}</span>${hol[date] ? `<span class="holname">${esc(hol[date])}</span>` : ''}${chips}</div>`;
+  }
+  view().innerHTML = `
+    <div class="head"><h1>${first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</h1>
+      <div class="actions"><button class="btn ghost sm" data-action="month" data-d="-1">Previous</button>
+      <button class="btn ghost sm" data-action="month" data-d="0">This month</button>
+      <button class="btn ghost sm" data-action="month" data-d="1">Next</button></div></div>
+    <div class="cal">${cells}</div>
+    <p class="small muted" style="margin-top:12px">Solid names are approved leave. Dashed names are still waiting for a decision.</p>`;
+}
+
+/* ---------- admin: staff ---------- */
+async function viewStaff() {
+  loading();
+  await loadPeople();
+  const { data: bal } = await sb.from('leave_balance_summary').select('*').eq('year', S.year);
+  if (S.tab !== 'staff') return;
+  const people = Object.values(S.people).sort((a, b) => a.full_name.localeCompare(b.full_name));
+  view().innerHTML = `
+    <div class="head"><h1>Staff</h1></div>
+    <h2 style="margin-bottom:14px">Add a person</h2>
+    <form id="addStaff" class="form" style="max-width:none">
+      <div class="row">
+        <label>Full name<input name="name" required></label>
+        <label>Email<input name="email" type="email" required></label>
+      </div>
+      <div class="row">
+        <label>Temporary password <span class="hint">At least 8 characters. Share it with them and ask them to change it.</span><input name="password" type="text" minlength="8" autocomplete="off" required></label>
+        <label>Role<select name="role"><option value="staff">Staff</option><option value="admin">Admin</option></select></label>
+      </div>
+      <div class="actions"><button class="btn" type="submit">Add person</button></div>
+    </form>
+    <h2 class="section" style="margin-bottom:14px">Everyone</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Name</th><th>Role</th><th>Leave left in ${S.year}</th><th>Status</th><th></th></tr></thead><tbody>
+      ${people.map(p => {
+        const mine = (bal || []).filter(b => b.user_id === p.id);
+        return `<tr>
+          <td>${esc(p.full_name)}<div class="small muted">${esc(p.email)}</div></td>
+          <td>${p.role === 'admin' ? 'Admin' : 'Staff'}</td>
+          <td>${mine.length ? mine.map(b => `<div>${esc(typeName(b.leave_type_id))}: ${fmtDays(b.remaining)} of ${fmtDays(b.entitlement)}</div>`).join('') : '<span class="muted">Not set up yet</span>'}</td>
+          <td>${p.active ? 'Active' : '<span class="muted">Deactivated</span>'}</td>
+          <td><div class="actions">
+            <button class="btn ghost sm" data-action="editEnt" data-id="${p.id}">Entitlements</button>
+            <button class="btn ghost sm" data-action="resetPw" data-id="${p.id}">Reset password</button>
+            ${p.id !== S.me.id ? `<button class="btn ghost sm" data-action="toggleActive" data-id="${p.id}" data-active="${p.active ? 0 : 1}">${p.active ? 'Deactivate' : 'Reactivate'}</button>` : ''}
+          </div></td></tr>`;
+      }).join('')}</tbody></table></div>`;
+  $('#addStaff').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = e.target, btn = f.querySelector('button'); btn.disabled = true;
+    try {
+      const r = await callAdmin({ action: 'create_user', full_name: f.name.value, email: f.email.value, password: f.password.value, role: f.role.value });
+      toast(r.linked_existing_login ? 'Added. This person already had a login, so their current password still works.' : 'Person added');
+      viewStaff();
+    } catch (err) { toast(errMsg(err), 'err'); btn.disabled = false; }
+  });
+}
+async function editEnt(id) {
+  const p = S.people[id], year = S.year;
+  const { data } = await sb.from('leave_balances').select('*').eq('user_id', id).eq('year', year);
+  const types = S.types.filter(t => t.has_balance && t.active);
+  const d = openDialog(`
+    <h2>${esc(p.full_name)}: ${year} entitlements</h2>
+    <form id="entForm" class="form" style="max-width:none">
+      ${types.map(t => { const row = (data || []).find(b => b.leave_type_id === t.id);
+        return `<label>${esc(t.name)} <span class="hint">days</span><input type="number" step="0.5" min="0" max="365" name="${t.id}" value="${row ? row.entitlement : t.default_days}"></label>`; }).join('') || '<p class="muted">No leave types with balances yet.</p>'}
+      <div class="actions"><button class="btn" type="submit">Save</button><button class="btn ghost" type="button" data-action="closeDlg">Cancel</button></div>
+    </form>`);
+  $('#entForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const rows = types.map(t => ({ user_id: id, leave_type_id: t.id, year, entitlement: Number(e.target.elements[t.id].value) }));
+    const { error } = await sb.from('leave_balances').upsert(rows, { onConflict: 'user_id,leave_type_id,year' });
+    if (error) { toast(errMsg(error), 'err'); return; }
+    closeDialog(); toast('Entitlements saved'); viewStaff();
+  });
+}
+function resetPw(id) {
+  openDialog(`
+    <h2>Reset password for ${esc(S.people[id].full_name)}</h2>
+    <form id="pwForm" class="form" style="max-width:none">
+      <label>New password <span class="hint">At least 8 characters</span><input name="password" type="text" minlength="8" autocomplete="off" required></label>
+      <div class="actions"><button class="btn" type="submit">Reset password</button><button class="btn ghost" type="button" data-action="closeDlg">Cancel</button></div>
+    </form>`);
+  $('#pwForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    try { await callAdmin({ action: 'reset_password', user_id: id, password: e.target.password.value }); closeDialog(); toast('Password reset'); }
+    catch (err) { toast(errMsg(err), 'err'); }
+  });
+}
+
+/* ---------- admin: settings ---------- */
+async function viewSettings() {
+  loading(); await Promise.all([loadTypes(), loadHolidays()]);
+  if (S.tab !== 'settings') return;
+  const today = isoToday();
+  view().innerHTML = `
+    <div class="head"><h1>Settings</h1></div>
+    <h2 style="margin-bottom:6px">Leave types</h2>
+    <p class="muted small" style="margin-bottom:14px">Yearly days apply to new people and new years. Change one person's days under Staff.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Name</th><th>Days per year</th><th>Limit by balance</th><th>In use</th><th></th></tr></thead><tbody>
+      ${S.types.map(t => `<tr data-type="${t.id}">
+        <td><input value="${esc(t.name)}" data-f="name" aria-label="Name"></td>
+        <td><input type="number" step="0.5" min="0" value="${t.default_days}" data-f="days" aria-label="Days per year" style="max-width:110px"></td>
+        <td><input type="checkbox" data-f="bal" ${t.has_balance ? 'checked' : ''} aria-label="Limit by balance"></td>
+        <td><input type="checkbox" data-f="active" ${t.active ? 'checked' : ''} aria-label="In use"></td>
+        <td><button class="btn ghost sm" data-action="saveType" data-id="${t.id}">Save</button></td></tr>`).join('')}</tbody></table></div>
+    <form id="addType" class="form" style="max-width:none;margin-top:16px">
+      <div class="row"><label>New leave type<input name="name" required></label>
+      <label>Days per year<input name="days" type="number" step="0.5" min="0" value="0"></label></div>
+      <label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" name="bal" checked> Limit by balance</label>
+      <div class="actions"><button class="btn" type="submit">Add leave type</button></div>
+    </form>
+
+    <h2 class="section" style="margin-bottom:6px">Public holidays</h2>
+    <p class="muted small" style="margin-bottom:14px">These dates and all weekends aren't counted as leave days. They apply to everyone. Adding a holiday doesn't change requests already made.</p>
+    <form id="addHoliday" class="form" style="max-width:none;margin-bottom:16px">
+      <div class="row"><label>Date<input type="date" name="date" required></label><label>Name<input name="name" required></label></div>
+      <div class="actions"><button class="btn" type="submit">Add holiday</button></div>
+    </form>
+    ${S.holidays.length ? `<div class="tablewrap"><table><thead><tr><th>Date</th><th>Name</th><th></th></tr></thead><tbody>
+      ${S.holidays.map(h => `<tr ${h.holiday_date < today ? 'class="muted"' : ''}><td>${esc(fmtDate(h.holiday_date))}</td><td>${esc(h.name)}</td>
+      <td><button class="btn ghost sm" data-action="removeHoliday" data-date="${h.holiday_date}">Remove</button></td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="tablewrap"><p class="empty">No public holidays added yet.</p></div>'}`;
+  $('#addType').addEventListener('submit', async e => {
+    e.preventDefault(); const f = e.target;
+    const { error } = await sb.from('leave_types').insert({ name: f.name.value.trim(), default_days: Number(f.days.value) || 0, has_balance: f.bal.checked });
+    if (error) { toast(error.code === '23505' ? 'A leave type with that name already exists.' : errMsg(error), 'err'); return; }
+    toast('Leave type added'); viewSettings();
+  });
+  $('#addHoliday').addEventListener('submit', async e => {
+    e.preventDefault(); const f = e.target;
+    const { error } = await sb.from('leave_holidays').insert({ holiday_date: f.date.value, name: f.name.value.trim() });
+    if (error) { toast(error.code === '23505' ? 'That date is already in the list.' : errMsg(error), 'err'); return; }
+    toast('Holiday added'); viewSettings();
+  });
+}
+
+/* ---------- actions ---------- */
+const actions = {
+  tab: el => { S.tab = el.dataset.tab; renderTab(); window.scrollTo(0, 0); },
+  signout: async () => { await sb.auth.signOut(); },
+  closeDlg: closeDialog,
+  changepw: () => {
+    openDialog(`<h2>Change password</h2>
+      <form id="myPw" class="form" style="max-width:none">
+        <label>New password <span class="hint">At least 8 characters</span><input type="password" name="password" minlength="8" autocomplete="new-password" required></label>
+        <div class="actions"><button class="btn" type="submit">Save password</button><button class="btn ghost" type="button" data-action="closeDlg">Cancel</button></div>
+      </form>`);
+    $('#myPw').addEventListener('submit', async e => {
+      e.preventDefault();
+      const { error } = await sb.auth.updateUser({ password: e.target.password.value });
+      if (error) { toast(errMsg(error), 'err'); return; }
+      closeDialog(); toast('Password changed');
+    });
+  },
+  cancelReq: async el => {
+    if (!confirm('Cancel this request?')) return;
+    const { error } = await sb.from('leave_requests').update({ status: 'cancelled' }).eq('id', el.dataset.id);
+    if (error) { toast(errMsg(error), 'err'); return; }
+    toast('Request cancelled'); viewMy();
+  },
+  decide: el => decide(el.dataset.id, el.dataset.status),
+  adminCancel: async el => {
+    if (!confirm('Cancel this approved leave? The days go back to the person\'s balance.')) return;
+    const { error } = await sb.from('leave_requests').update({ status: 'cancelled' }).eq('id', el.dataset.id);
+    if (error) { toast(errMsg(error), 'err'); return; }
+    toast('Leave cancelled'); viewRequests();
+  },
+  viewfile: async el => {
+    const { data, error } = await sb.storage.from('leave-attachments').createSignedUrl(el.dataset.path, 120);
+    if (error) { toast(errMsg(error), 'err'); return; }
+    window.open(data.signedUrl, '_blank', 'noopener');
+  },
+  month: el => {
+    const d = Number(el.dataset.d), now = new Date();
+    if (d === 0) S.month = { y: now.getFullYear(), m: now.getMonth() };
+    else { const n = new Date(S.month.y, S.month.m + d, 1); S.month = { y: n.getFullYear(), m: n.getMonth() }; }
+    viewCalendar();
+  },
+  editEnt: el => editEnt(el.dataset.id),
+  resetPw: el => resetPw(el.dataset.id),
+  toggleActive: async el => {
+    const active = el.dataset.active === '1';
+    if (!active && !confirm('Deactivate this person? They won\'t be able to sign in to the leave app.')) return;
+    try { await callAdmin({ action: 'set_active', user_id: el.dataset.id, active }); toast(active ? 'Reactivated' : 'Deactivated'); viewStaff(); }
+    catch (err) { toast(errMsg(err), 'err'); }
+  },
+  saveType: async el => {
+    const tr = el.closest('tr'), g = k => tr.querySelector(`[data-f="${k}"]`);
+    const { error } = await sb.from('leave_types').update({
+      name: g('name').value.trim(), default_days: Number(g('days').value) || 0, has_balance: g('bal').checked, active: g('active').checked
+    }).eq('id', el.dataset.id);
+    if (error) { toast(error.code === '23505' ? 'A leave type with that name already exists.' : errMsg(error), 'err'); return; }
+    toast('Leave type saved'); loadTypes();
+  },
+  removeHoliday: async el => {
+    const { error } = await sb.from('leave_holidays').delete().eq('holiday_date', el.dataset.date);
+    if (error) { toast(errMsg(error), 'err'); return; }
+    toast('Holiday removed'); viewSettings();
+  }
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (el && actions[el.dataset.action]) actions[el.dataset.action](el);
+});
+
+boot();
+</script>
+</body>
+</html>
